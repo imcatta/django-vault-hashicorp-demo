@@ -13,7 +13,10 @@ services:
     image: postgres:11.2-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+    environment:
+      POSTGRES_USER: posgres
+      POSTGRES_PASSWORD: postgres
+      
   web:
     << : *django
     command: python manage.py runserver 0.0.0.0:8000
