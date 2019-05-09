@@ -1,0 +1,22 @@
+{% extends 'board/base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="text-center">
+    <h1 class="display-3 m-3">Super board</h1>
+</div>
+<hr>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save">
+</form>
+<hr>
+{% for post in posts_list %}
+<div class="card m-2">
+    <div class="card-body">
+        <p class="mb-3">{{ post.message }}</p>
+        <small>by <b>{{ post.author }}</b> ({{ post.created_at | naturaltime }})</small>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock content %}
