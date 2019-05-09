@@ -9,9 +9,7 @@ services:
     image: postgres:11.2-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    env_file: ./variables.env
 
   web:
     build:
@@ -27,3 +25,4 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    env_file: ./variables.env
