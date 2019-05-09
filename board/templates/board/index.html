@@ -1,13 +1,14 @@
 {% extends 'board/base.html' %}
+{% load crispy_forms_tags %}
 {% load humanize %}
 {% block content %}
 <div class="text-center">
     <h1 class="display-3 m-3">Super board</h1>
 </div>
 <hr>
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Save">
+<form method="post" style="max-width: 500px; margin: auto;">{% csrf_token %}
+    {{ form | crispy }}
+    <input type="submit" class="btn btn-dark" value="Send">
 </form>
 <hr>
 {% for post in posts_list %}
