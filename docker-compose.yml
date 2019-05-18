@@ -10,16 +10,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  web:
+  django:
     build:
-      context: .
-      dockerfile: ./compose/django/Dockerfile
+      context: ./django
     command: >
       sh -c "python ./wait_for_postgres.py &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/code
+      - ./django:/code
     ports:
       - "8000:8000"
     depends_on:
