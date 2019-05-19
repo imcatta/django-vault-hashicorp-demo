@@ -38,6 +38,9 @@ services:
       - ./vault/config:/vault/config
       - vault_file:/vault/file
       - vault_logs:/vault/logs
-    env_file: ./variables.env
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_ADDR=http://vault:8200
     cap_add:
       - IPC_LOCK
