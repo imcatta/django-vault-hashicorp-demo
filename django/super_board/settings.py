@@ -23,10 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env()
 
-client = hvac.Client(
-    url=env.str('VAULT_URL'),
-    token=env.str('VAULT_TOKEN')
-)
+client = hvac.Client(url=env.str('VAULT_URL'))
+client.auth_approle(env.str('VAULT_ROLEID'), env.str('VAULT_SECRETID'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
