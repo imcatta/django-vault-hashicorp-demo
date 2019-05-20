@@ -12,17 +12,30 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import environ
+import hvac
+from vault12factor import \
+    VaultCredentialProvider, \
+    VaultAuth12Factor, \
+    DjangoAutoRefreshDBCredentialsDict
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env()
 
+client = hvac.Client(
+    url=env.str('VAULT_URL'),
+    token=env.str('VAULT_TOKEN')
+)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str('DJANGO_SECRET_KEY', '')
+SECRET_KEY = client.secrets.kv.v2.read_secret_version(
+    path='django',
+    mount_point='kv'
+)['data']['data']['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +54,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'crispy_forms',
+    'django_dbconn_retry',
+    'vault12factor',
     'board',
 ]
 
@@ -75,21 +90,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'super_board.wsgi.application'
 
 
+# Vault 12-factor
+# https://github.com/jdelic/12factor-vault
+
+VAULT = VaultAuth12Factor.fromenv()
+CREDS = VaultCredentialProvider(
+    env.str('VAULT_URL'),
+    VAULT,
+    env.str('VAULT_CREDS_PATH')
+)
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': DjangoAutoRefreshDBCredentialsDict(CREDS, {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': env.str('POSTGRES_DB', 'postgres'),
-        'USER': env.str('POSTGRES_USER', 'postgres'),
-        'PASSWORD': env.str('POSTGRES_PASSWORD', 'postgres'),
+        'USER': CREDS.username,
+        'PASSWORD': CREDS.password,
         'HOST': env.str('DATABASE_URL', 'db'),
         'PORT': env.int('POSTGRES_PORT', 5432),
-        'ATOMIC_REQUESTS': True
-    }
+    }),
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
